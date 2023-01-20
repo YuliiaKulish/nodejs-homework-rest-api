@@ -1,5 +1,5 @@
 const app = require("./app");
-const db = require("./models/contacts-db");
+const db = require("./contacts/contacts-db");
 
 const PORT = 3000;
 
