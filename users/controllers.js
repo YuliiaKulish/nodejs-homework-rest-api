@@ -1,12 +1,16 @@
 const UserSchema = require("./schema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const fs = require("fs").promises;
+const Jimp = require("jimp");
+const gravatar = require("gravatar");
 
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
+  const avatarURL = gravatar.url(email);
   const user = await UserSchema.findOneAndUpdate(
     { email },
-    { name, email, password: await bcrypt.hash(password, 10) },
+    { name, email, password: await bcrypt.hash(password, 10), avatarURL },
     { upsert: true }
   );
   if (user) {
@@ -66,10 +70,21 @@ const updateSubscription = async (req, res) => {
   res.status(200).json({ subscription }).end();
 };
 
+const updateAvatar = async (req, res) => {
+  const { _id } = req.user;
+  const { path } = req.file;
+  const result = await Jimp.read(path);
+  result.cover(250, 250).write(`public/avatars/${_id}`);
+  await fs.unlink(path);
+  await UserSchema.findByIdAndUpdate(_id, { avatarURL: `/avatars/${_id}` });
+  res.status(200).json({ avatarURL: `/avatars/${_id}` });
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getCurrentUser,
   logoutUser,
   updateSubscription,
+  updateAvatar,
 };
