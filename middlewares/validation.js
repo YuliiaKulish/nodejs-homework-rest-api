@@ -23,6 +23,10 @@ const validateUpdateFavorite = Joi.object({
   }),
 });
 
+const verifySchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
 const validate = async (schema, request, next) => {
   try {
     await schema.validateAsync(request);
@@ -43,6 +47,9 @@ module.exports = {
   },
   validateUpdateFavorite: (req, res, next) => {
     return validate(validateUpdateFavorite, req.body, next);
+  },
+  verifySchema: (req, res, next) => {
+    return validate(verifySchema, req.body, next);
   },
   validateMongoId: (req, res, next) => {
     if (!mongoose.isValidObjectId(req.params.contactId)) {
